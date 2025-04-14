@@ -219,7 +219,7 @@ function SentenceBuilder() {
                         </div>
 
                         {/* Main Question */}
-                        <div className="text-lg font-semibold">{renderQuestion()}</div>
+                        <div className="text-lg font-semibold break-words max-w-full">{renderQuestion()}</div>
 
                         {/* Options */}
                         {renderOptions()}
