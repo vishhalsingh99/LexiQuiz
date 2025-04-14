@@ -3,10 +3,8 @@ import axios from 'axios';
 import { UserButton } from "@clerk/clerk-react";
 import { useNavigate } from 'react-router-dom';
 
-
-
-
 function SentenceBuilder() {
+    // State variables to manage quiz logic
     const [questions, setQuestions] = useState([]);
     const [questionIndex, setQuestionIndex] = useState(0);
     const [selectedWords, setSelectedWords] = useState([]);
@@ -16,13 +14,10 @@ function SentenceBuilder() {
     const [score, setScore] = useState(0);
     const [userAnswers, setUserAnswers] = useState([]);
 
-   
+    const currentQuestion = questions[questionIndex]; // Get the current question
+    const navigate = useNavigate(); // Router navigation hook
 
-    const currentQuestion = questions[questionIndex];
-    const navigate = useNavigate();
-
-
-
+    // Fetch questions from JSON file once when component mounts
     useEffect(() => {
         const fetchQuestions = async () => {
             try {
@@ -36,7 +31,7 @@ function SentenceBuilder() {
         fetchQuestions();
     }, []);
 
-
+    // Set blank fields based on how many blanks are in the question
     useEffect(() => {
         if (currentQuestion) {
             const blanks = currentQuestion.question.split(" ").filter(w => w === "___" || w === "_____________").length;
@@ -44,6 +39,7 @@ function SentenceBuilder() {
         }
     }, [questionIndex, currentQuestion]);
 
+    // Timer countdown and auto move to next question if time runs out
     useEffect(() => {
         if (timerActive && timer > 0) {
             const interval = setInterval(() => {
@@ -52,10 +48,11 @@ function SentenceBuilder() {
             return () => clearInterval(interval);
         }
         if (timer === 0) {
-            handleNext();
+            handleNext(); // Auto submit when time runs out
         }
     }, [timer, timerActive]);
 
+    // Reset timer and start it for each new question
     useEffect(() => {
         if (questions.length > 0) {
             setTimer(30);
@@ -63,8 +60,9 @@ function SentenceBuilder() {
         }
     }, [questionIndex, questions]);
 
+    // Handle selecting a word to fill in the blanks
     const handleClickOnWord = (word) => {
-        if (selectedWords.includes(word)) return;
+        if (selectedWords.includes(word)) return; // Prevent selecting same word again
         const indexToFill = selectedWords.findIndex(w => w === null);
         if (indexToFill !== -1) {
             const newSelected = [...selectedWords];
@@ -73,18 +71,21 @@ function SentenceBuilder() {
         }
     };
 
+    // Handle unselecting a previously selected word from a blank
     const handleUnselect = (index) => {
         const newSelected = [...selectedWords];
         newSelected[index] = null;
         setSelectedWords(newSelected);
     };
 
+    // Move to next question or finish the quiz
     const handleNext = () => {
         const correct = currentQuestion.correctAnswer;
         const isCorrect = JSON.stringify(selectedWords) === JSON.stringify(correct);
 
-        if (isCorrect) setScore(score + 1);
+        if (isCorrect) setScore(score + 1); // Update score if correct
 
+        // Store user answer details
         const answerDetails = {
             question: currentQuestion.question,
             selected: selectedWords,
@@ -95,6 +96,7 @@ function SentenceBuilder() {
         const updatedAnswers = [...userAnswers, answerDetails];
         setUserAnswers(updatedAnswers);
 
+        // Move to next question or show feedback screen
         if (questionIndex + 1 < questions.length) {
             setQuestionIndex(questionIndex + 1);
             setSelectedWords([]);
@@ -106,6 +108,7 @@ function SentenceBuilder() {
         }
     };
 
+    // Render the question with blanks to be filled by user
     const renderQuestion = () => {
         if (!currentQuestion) return null;
         const parts = currentQuestion.question.split(" ");
@@ -119,7 +122,9 @@ function SentenceBuilder() {
                 return (
                     <span
                         key={i}
-                        className={`inline-block min-w-[80px] mx-1 py-1 px-2 rounded border text-center cursor-pointer transition ${filled ? "border-blue-500 bg-blue-100 text-blue-600" : "border-gray-400 text-gray-400"}`}
+                        className={`inline-block min-w-[80px] mx-1 py-1 px-2 rounded border text-center cursor-pointer transition ${
+                            filled ? "border-blue-500 bg-blue-100 text-blue-600" : "border-gray-400 text-gray-400"
+                        }`}
                         onClick={() => handleUnselect(idx)}
                     >
                         {filled || "____"}
@@ -130,6 +135,7 @@ function SentenceBuilder() {
         });
     };
 
+    // Render the options for the current question
     const renderOptions = () => {
         if (!currentQuestion) return null;
         return (
@@ -138,7 +144,9 @@ function SentenceBuilder() {
                     <button
                         key={i}
                         onClick={() => handleClickOnWord(word)}
-                        className={`py-2 px-4 rounded-full border border-gray-300 shadow-sm text-gray-700 hover:bg-blue-100 transition ${selectedWords.includes(word) ? "opacity-50 cursor-not-allowed" : ""}`}
+                        className={`py-2 px-4 rounded-full border border-gray-300 shadow-sm text-gray-700 hover:bg-blue-100 transition ${
+                            selectedWords.includes(word) ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                         disabled={selectedWords.includes(word)}
                     >
                         {word}
@@ -148,15 +156,19 @@ function SentenceBuilder() {
         );
     };
 
+    // Render the feedback screen after quiz is completed
     const renderFeedback = () => (
         <div>
-
+            {/* Clerk User Button for profile/logout */}
             <div className="absolute top-4 right-4">
                 <UserButton />
             </div>
+
             <div className="text-left space-y-4">
                 <h2 className="text-2xl font-bold text-center">Quiz Completed</h2>
                 <p className="text-center">Your Score: {score} / {questions.length}</p>
+
+                {/* Display answers for each question */}
                 <div className="space-y-6 mt-4">
                     {userAnswers.map((ans, idx) => (
                         <div key={idx} className="p-4 border rounded-xl">
@@ -172,10 +184,12 @@ function SentenceBuilder() {
                         </div>
                     ))}
                 </div>
+
+                {/* Go to Home Button */}
                 <div>
                     <button
                         onClick={() => navigate('/')}
-                        className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-600 transition"
+                        className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                     >
                         Go to Home
                     </button>
@@ -184,6 +198,7 @@ function SentenceBuilder() {
         </div>
     );
 
+    // Check if all blanks are filled to enable "Next" button
     const allFilled = selectedWords.every(word => word !== null);
 
     return (
@@ -193,19 +208,29 @@ function SentenceBuilder() {
                     renderFeedback()
                 ) : (
                     <>
+                        {/* Timer */}
                         <div className="mt-4 text-xl font-semibold">
                             Time Remaining: {timer} seconds
                         </div>
+
+                        {/* Progress */}
                         <div className="text-sm text-gray-500 flex justify-center items-center">
                             Question {questionIndex + 1} of {questions.length}
                         </div>
+
+                        {/* Main Question */}
                         <div className="text-lg font-semibold">{renderQuestion()}</div>
+
+                        {/* Options */}
                         {renderOptions()}
+
+                        {/* Next Button */}
                         <button
-                            className={`mt-6 w-full py-2 px-4 rounded-xl text-white font-medium transition ${allFilled && timer > 0
-                                ? "bg-blue-600 hover:bg-blue-700"
-                                : "bg-gray-400 cursor-not-allowed"
-                                }`}
+                            className={`mt-6 w-full py-2 px-4 rounded-xl text-white font-medium transition ${
+                                allFilled && timer > 0
+                                    ? "bg-blue-600 hover:bg-blue-700"
+                                    : "bg-gray-400 cursor-not-allowed"
+                            }`}
                             disabled={!allFilled || timer === 0}
                             onClick={handleNext}
                         >
@@ -215,7 +240,6 @@ function SentenceBuilder() {
                 )}
             </div>
         </div>
-
     );
 }
 
