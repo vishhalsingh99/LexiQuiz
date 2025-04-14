@@ -123,7 +123,7 @@ npm run dev
 
 ## 🌐 Deployment
 
-You can deploy this app easily using **Vercel**, **Netlify**, or **Render**. Make sure to add the environment variable `VITE_CLERK_PUBLISHABLE_KEY`.
+[Visit LexiQuiz Project](https://lexiquiz.netlify.app/)
 
 ---
 
