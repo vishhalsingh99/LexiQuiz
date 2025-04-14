@@ -1,4 +1,3 @@
-Absolutely, Vishal! Here's a clean and professional **documentation** for your project **LexiQuiz**, which you can use for your GitHub `README.md` or as a separate `.docx` file if you'd like to export it later.
 
 ---
 
