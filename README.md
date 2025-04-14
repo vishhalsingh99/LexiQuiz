@@ -121,12 +121,6 @@ npm run dev
 
 ---
 
-## 📸 Screenshots
-
-> (Add screenshots here after deploying or running the app locally)
-
----
-
 ## 🌐 Deployment
 
 You can deploy this app easily using **Vercel**, **Netlify**, or **Render**. Make sure to add the environment variable `VITE_CLERK_PUBLISHABLE_KEY`.
